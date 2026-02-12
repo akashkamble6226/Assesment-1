@@ -14,23 +14,30 @@ namespace AvalphaTechnologies.CommissionCalculator
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
-            var app = builder.Build();
+            //as the app causing CORS issue , tried temporary solution to work with all origins
+            // TODO -
+             // need to add proper Origin
 
-            // Configure the HTTP request pipeline.
-            if (app.Environment.IsDevelopment())
-            {
-                app.UseSwagger();
-                app.UseSwaggerUI();
-            }
+            // Add CORS
+   builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowLocalhost", policy =>
+    {
+        policy.WithOrigins("http://localhost:3000")
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
 
-            app.UseHttpsRedirection();
+var app = builder.Build();
 
-            app.UseAuthorization();
+app.UseCors("AllowLocalhost");
 
+// app.UseHttpsRedirection();
+app.UseAuthorization();
+app.MapControllers();
 
-            app.MapControllers();
-
-            app.Run();
+app.Run();
         }
     }
 }

@@ -67,14 +67,14 @@ Total = £95.5
 
 ## 🧩 Your Tasks (Checklist)
 
-- [ ] Wire up the **React frontend** to call the backend API  
-- [ ] Implement calculation logic 
-- [ ] Validate inputs (numbers ≥ 0, sensible upper bounds)  
-- [ ] Return a typed, well-structured response (DTO)  
-- [ ] Display results in the UI with clear labels and currency formatting  
-- [ ] Handle errors gracefully (backend & UI)  
-- [ ] Provide basic **docs**: how to run, how to test, decisions  
-- [ ] Keep commits small and messages clear  
+- [✅] Wire up the **React frontend** to call the backend API
+- [✅] Implement calculation logic
+- [✅] Validate inputs (numbers ≥ 0, sensible upper bounds)
+- [✅] Return a typed, well-structured response (DTO)
+- [✅] Display results in the UI with clear labels and currency formatting
+- [✅] Handle errors gracefully (backend & UI)
+- [✅ ] Provide basic **docs**: how to run, how to test, decisions
+- [] Keep commits small and messages clear 
 
 ---
 
