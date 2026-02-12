@@ -10,6 +10,29 @@ const COMMISSION_RATES = {
   competitor: { local: 2, foreign: 7.55 },
 };
 
+// Format large numbers with abbreviations (K, M, B, T)
+// Scientific notation: 1e12 = 1,000,000,000,000 (1 trillion)
+const formatLargeNumber = (num) => {
+  const parsedNum = parseFloat(num);
+  const absNum = Math.abs(parsedNum);
+
+  if (absNum >= 1e12) {
+    // Abbreviate as Trillions (T)
+    return (parsedNum / 1e12).toFixed(2) + "T";
+  } else if (absNum >= 1e9) {
+    // Abbreviate as Billions (B)
+    return (parsedNum / 1e9).toFixed(2) + "B";
+  } else if (absNum >= 1e6) {
+    // Abbreviate as Millions (M)
+    return (parsedNum / 1e6).toFixed(2) + "M";
+  } else if (absNum >= 1e3) {
+    // Abbreviate as Thousands (K)
+    return (parsedNum / 1e3).toFixed(2) + "K";
+  }
+  // Return as is with 2 decimal places for numbers less than 1000
+  return parsedNum.toFixed(2);
+};
+
 function App() {
   // Form state: tracks user input for sales calculations
   const [formData, setFormData] = useState({
@@ -180,7 +203,7 @@ function App() {
                   </span>
                 </div>
                 <div className="result-amount">
-                  £{results.avalphaTechnologiesCommission}
+                  £{formatLargeNumber(results.avalphaTechnologiesCommission)}
                 </div>
               </div>
 
@@ -194,7 +217,7 @@ function App() {
                   </span>
                 </div>
                 <div className="result-amount">
-                  £{results.competitorCommission}
+                  £{formatLargeNumber(results.competitorCommission)}
                 </div>
               </div>
             </div>
@@ -207,10 +230,10 @@ function App() {
                   <strong>
                     {" "}
                     £
-                    {(
+                    {formatLargeNumber(
                       results.avalphaTechnologiesCommission -
-                      results.competitorCommission
-                    ).toFixed(2)}
+                        results.competitorCommission,
+                    )}
                   </strong>
                 </p>
               </div>
