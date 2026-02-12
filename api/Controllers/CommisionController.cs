@@ -58,11 +58,7 @@ namespace AvalphaTechnologies.CommissionCalculator.Controllers
 
             return Ok(new CommissionCalculationResponse()
             {
-                AvalphaTechnologiesCommissionLocal = avalphLocalCommission,
-                AvalphaTechnologiesCommissionForeign = avalphForeignCommission,
                 AvalphaTechnologiesCommissionAmount = avalphTotalCommission,
-                CompetitorCommissionLocal = competitorLocalCommission,
-                CompetitorCommissionForeign = competitorForeignCommission,
                 CompetitorCommissionAmount = competitorTotalCommission
             });
         }
@@ -77,11 +73,7 @@ namespace AvalphaTechnologies.CommissionCalculator.Controllers
 
     public class CommissionCalculationResponse
     {
-        public decimal AvalphaTechnologiesCommissionLocal { get; set; }
-        public decimal AvalphaTechnologiesCommissionForeign { get; set; }
         public decimal AvalphaTechnologiesCommissionAmount { get; set; }
-        public decimal CompetitorCommissionLocal { get; set; }
-        public decimal CompetitorCommissionForeign { get; set; }
         public decimal CompetitorCommissionAmount { get; set; }
     }
 }

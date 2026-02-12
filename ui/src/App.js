@@ -2,13 +2,23 @@ import logo from "./logo.png";
 import "./App.css";
 import { useState } from "react";
 
+// Constants for API and validation
+const API_ENDPOINT = "http://localhost:5111/commision";
+const MIN_VALID_VALUE = 0;
+const COMMISSION_RATES = {
+  avalpha: { local: 20, foreign: 35 },
+  competitor: { local: 2, foreign: 7.55 },
+};
+
 function App() {
+  // Form state: tracks user input for sales calculations
   const [formData, setFormData] = useState({
     localSalesCount: "",
     foreignSalesCount: "",
     averageSaleAmount: "",
   });
 
+  // Results state: stores commission calculations from API
   const [results, setResults] = useState({
     avalphaTechnologiesCommission: 0,
     competitorCommission: 0,
@@ -24,23 +34,28 @@ function App() {
     }));
   };
 
+  const validateFormData = () => {
+    return (
+      parseFloat(formData.localSalesCount) > MIN_VALID_VALUE &&
+      parseFloat(formData.foreignSalesCount) > MIN_VALID_VALUE &&
+      parseFloat(formData.averageSaleAmount) > MIN_VALID_VALUE
+    );
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
 
-    //stopping the call for BE if the values are negative or zero
-    if (
-      parseFloat(formData.localSalesCount) <= 0 ||
-      parseFloat(formData.foreignSalesCount) <= 0 ||
-      parseFloat(formData.averageSaleAmount) <= 0
-    ) {
+    // Validate input before making API call
+    if (!validateFormData()) {
       alert("Please enter positive values for all fields.");
       setIsLoading(false);
       return;
     }
 
     try {
-      const response = await fetch("http://localhost:5111/commision", {
+      // Make API request with validated sales data
+      const response = await fetch(API_ENDPOINT, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -52,6 +67,7 @@ function App() {
         }),
       });
 
+      // Check if API response is successful
       if (!response.ok) {
         throw new Error("Failed to fetch commission data");
       }
@@ -59,15 +75,18 @@ function App() {
       const data = await response.json();
       console.log("API Response:", data); // Debug log
 
+      // Update results with formatted commission amounts (2 decimal places)
       setResults({
         avalphaTechnologiesCommission:
           data.avalphaTechnologiesCommissionAmount.toFixed(2),
         competitorCommission: data.competitorCommissionAmount.toFixed(2),
       });
     } catch (error) {
+      // Log error for debugging and notify user
       console.error("Error:", error);
       alert("Error calculating commission. Please try again.");
     } finally {
+      // Always reset loading state regardless of success or failure
       setIsLoading(false);
     }
   };
@@ -88,6 +107,7 @@ function App() {
 
       <main className="main-content">
         <div className="calculator-container">
+          {/* Sales input form section */}
           <div className="form-section">
             <h3>Sales Information</h3>
             <form onSubmit={handleSubmit} className="calculator-form">
@@ -101,6 +121,7 @@ function App() {
                   onChange={handleInputChange}
                   placeholder="Enter number of local sales"
                   required
+                  min="1"
                 />
               </div>
 
@@ -114,6 +135,7 @@ function App() {
                   onChange={handleInputChange}
                   placeholder="Enter number of foreign sales"
                   required
+                  min="1"
                 />
               </div>
 
@@ -130,6 +152,7 @@ function App() {
                   onChange={handleInputChange}
                   placeholder="Enter average sale amount"
                   required
+                  min="0.01"
                 />
               </div>
 
@@ -143,14 +166,17 @@ function App() {
             </form>
           </div>
 
+          {/* Commission results display section */}
           <div className="results-section">
             <h3>Commission Results</h3>
             <div className="results-grid">
+              {/* Avalpha Technologies commission card */}
               <div className="result-card avalpha-card">
                 <div className="result-header">
                   <h4>Avalpha Technologies</h4>
                   <span className="commission-rates">
-                    Local: 20% | Foreign: 35%
+                    Local: {COMMISSION_RATES.avalpha.local}% | Foreign:{" "}
+                    {COMMISSION_RATES.avalpha.foreign}%
                   </span>
                 </div>
                 <div className="result-amount">
@@ -158,11 +184,13 @@ function App() {
                 </div>
               </div>
 
+              {/* Competitor commission card for comparison */}
               <div className="result-card competitor-card">
                 <div className="result-header">
                   <h4>Competitor</h4>
                   <span className="commission-rates">
-                    Local: 2% | Foreign: 7.55%
+                    Local: {COMMISSION_RATES.competitor.local}% | Foreign:{" "}
+                    {COMMISSION_RATES.competitor.foreign}%
                   </span>
                 </div>
                 <div className="result-amount">
@@ -171,6 +199,7 @@ function App() {
               </div>
             </div>
 
+            {/* Display competitive advantage only when results are available */}
             {results.avalphaTechnologiesCommission > 0 && (
               <div className="advantage-indicator">
                 <p className="advantage-text">
