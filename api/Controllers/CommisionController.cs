@@ -1,79 +1,79 @@
 using Microsoft.AspNetCore.Mvc;
+using AvalphaTechnologies.CommissionCalculator.Services;
+using AvalphaTechnologies.CommissionCalculator;
 
 namespace AvalphaTechnologies.CommissionCalculator.Controllers
 {
+    /// <summary>
+    /// API Controller for commission calculations
+    /// Handles HTTP requests and delegates calculation logic to CommissionCalculationService
+    /// </summary>
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     public class CommisionController : ControllerBase
     {
-        [ProducesResponseType(typeof(CommissionCalculationResponse), 200)]
-        [HttpPost]
-        public IActionResult Calculate(CommissionCalculationRequest calculationRequest)
-        {
-            Console.WriteLine("=== Commission Calculation Request ===");
-            Console.WriteLine($"LocalSalesCount: {calculationRequest?.LocalSalesCount}");
-            Console.WriteLine($"ForeignSalesCount: {calculationRequest?.ForeignSalesCount}");
-            Console.WriteLine($"AverageSaleAmount: {calculationRequest?.AverageSaleAmount}");
+        private readonly CommissionCalculationService _commissionService;
 
-            if (calculationRequest == null || calculationRequest.LocalSalesCount < 0 || 
-                calculationRequest.ForeignSalesCount < 0 || calculationRequest.AverageSaleAmount < 0)
+        public CommisionController()
+        {
+            // Initialize service
+            _commissionService = new CommissionCalculationService();
+        }
+
+        /// <summary>
+        /// Calculates sales commissions for Avalpha Technologies and competitor
+        /// POST /api/commision/calculate
+        /// </summary>
+        /// <param name="request">Commission calculation request containing sales data</param>
+        /// <returns>Commission calculation response with results</returns>
+        [HttpPost("calculate")]
+        public IActionResult Calculate([FromBody] CommissionCalculationRequest request)
+        {
+            // Null check
+            if (request == null)
             {
-                Console.WriteLine("ERROR: Invalid input values");
-                return BadRequest("Invalid input values. All values must be >= 0");
+                return BadRequest("Request cannot be null");
             }
 
-            // Avalpha rates
-            const decimal avalphLocalRate = 0.20m;
-            const decimal avalphForeignRate = 0.35m;
+            // Validate inputs using service
+            var (isValid, errorMessage) = _commissionService.ValidateInputs(
+                request.LocalSalesCount,
+                request.ForeignSalesCount,
+                request.AverageSaleAmount
+            );
 
-            // Competitor rates
-            const decimal competitorLocalRate = 0.02m;
-            const decimal competitorForeignRate = 0.0755m;
-
-            // Calculate Avalpha commission (Local)
-            decimal avalphLocalCommission = avalphLocalRate * calculationRequest.LocalSalesCount * calculationRequest.AverageSaleAmount;
-            
-            // Calculate Avalpha commission (Foreign)
-            decimal avalphForeignCommission = avalphForeignRate * calculationRequest.ForeignSalesCount * calculationRequest.AverageSaleAmount;
-            
-            // Total Avalpha commission
-            decimal avalphTotalCommission = avalphLocalCommission + avalphForeignCommission;
-
-            // Calculate Competitor commission (Local)
-            decimal competitorLocalCommission = competitorLocalRate * calculationRequest.LocalSalesCount * calculationRequest.AverageSaleAmount;
-            
-            // Calculate Competitor commission (Foreign)
-            decimal competitorForeignCommission = competitorForeignRate * calculationRequest.ForeignSalesCount * calculationRequest.AverageSaleAmount;
-            
-            // Total Competitor commission
-            decimal competitorTotalCommission = competitorLocalCommission + competitorForeignCommission;
-
-            Console.WriteLine($"Avalpha Local: {avalphLocalCommission}");
-            Console.WriteLine($"Avalpha Foreign: {avalphForeignCommission}");
-            Console.WriteLine($"Avalpha Total: {avalphTotalCommission}");
-            Console.WriteLine($"Competitor Local: {competitorLocalCommission}");
-            Console.WriteLine($"Competitor Foreign: {competitorForeignCommission}");
-            Console.WriteLine($"Competitor Total: {competitorTotalCommission}");
-            Console.WriteLine("=== End ===\n");
-
-            return Ok(new CommissionCalculationResponse()
+            if (!isValid)
             {
-                AvalphaTechnologiesCommissionAmount = avalphTotalCommission,
-                CompetitorCommissionAmount = competitorTotalCommission
-            });
+                return BadRequest(errorMessage);
+            }
+
+            // Calculate commissions using service
+            decimal avalphaTechnologiesCommission = _commissionService.CalculateAvalphaTechnologiesCommission(
+                request.LocalSalesCount,
+                request.ForeignSalesCount,
+                request.AverageSaleAmount
+            );
+
+            decimal competitorCommission = _commissionService.CalculateCompetitorCommission(
+                request.LocalSalesCount,
+                request.ForeignSalesCount,
+                request.AverageSaleAmount
+            );
+
+            decimal competitiveAdvantage = _commissionService.CalculateCompetitiveAdvantage(
+                avalphaTechnologiesCommission,
+                competitorCommission
+            );
+
+            // Return response
+            var response = new CommissionCalculationResponse
+            {
+                AvalphaTechnologiesCommissionAmount = avalphaTechnologiesCommission,
+                CompetitorCommissionAmount = competitorCommission,
+                CompetitiveAdvantage = competitiveAdvantage
+            };
+
+            return Ok(response);
         }
-    }
-
-    public class CommissionCalculationRequest
-    {
-        public int LocalSalesCount { get; set; }
-        public int ForeignSalesCount { get; set; }
-        public decimal AverageSaleAmount { get; set; }
-    }
-
-    public class CommissionCalculationResponse
-    {
-        public decimal AvalphaTechnologiesCommissionAmount { get; set; }
-        public decimal CompetitorCommissionAmount { get; set; }
     }
 }

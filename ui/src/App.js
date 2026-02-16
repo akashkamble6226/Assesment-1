@@ -1,6 +1,7 @@
 import logo from "./logo.png";
 import "./App.css";
 import { useState } from "react";
+import { formatLargeNumber } from "./commissionCalculator";
 
 // Constants for API and validation
 const API_ENDPOINT = "http://localhost:5111/commision";
@@ -8,29 +9,6 @@ const MIN_VALID_VALUE = 0;
 const COMMISSION_RATES = {
   avalpha: { local: 20, foreign: 35 },
   competitor: { local: 2, foreign: 7.55 },
-};
-
-// Format large numbers with abbreviations (K, M, B, T)
-// Scientific notation: 1e12 = 1,000,000,000,000 (1 trillion)
-const formatLargeNumber = (num) => {
-  const parsedNum = parseFloat(num);
-  const absNum = Math.abs(parsedNum);
-
-  if (absNum >= 1e12) {
-    // Abbreviate as Trillions (T)
-    return (parsedNum / 1e12).toFixed(2) + "T";
-  } else if (absNum >= 1e9) {
-    // Abbreviate as Billions (B)
-    return (parsedNum / 1e9).toFixed(2) + "B";
-  } else if (absNum >= 1e6) {
-    // Abbreviate as Millions (M)
-    return (parsedNum / 1e6).toFixed(2) + "M";
-  } else if (absNum >= 1e3) {
-    // Abbreviate as Thousands (K)
-    return (parsedNum / 1e3).toFixed(2) + "K";
-  }
-  // Return as is with 2 decimal places for numbers less than 1000
-  return parsedNum.toFixed(2);
 };
 
 function App() {
